@@ -54,19 +54,35 @@ func (module *PP2PLink) Start() {
 
 	// Cliente TCP: Envia as mensagens com Retry (garante a entrega)
 	go func() {
+		// Mapa para guardar uma fila separada para cada processo destino
+		filasDeEnvio := make(map[string]chan string)
+
 		for req := range module.Req {
-			go func(r PP2PLink_Req_Message) {
-				for {
-					conn, err := net.Dial("tcp", r.To)
-					if err == nil {
-						fmt.Fprintf(conn, r.Message+"\n")
-						conn.Close()
-						break
+			ch, existe := filasDeEnvio[req.To]
+			if !existe {
+				// Se a fila deste destino não existe, criamos uma com buffer
+				ch = make(chan string, 100)
+				filasDeEnvio[req.To] = ch
+
+				// Inicia um ÚNICO carteiro (goroutine) dedicado para este destino.
+				// Como ele pega uma mensagem de cada vez da fila, a ordem nunca é quebrada.
+				go func(destino string, fila chan string) {
+					for msg := range fila {
+						for {
+							conn, err := net.Dial("tcp", destino)
+							if err == nil {
+								fmt.Fprintf(conn, msg+"\n")
+								conn.Close()
+								break // Sai do loop de retry, vai pegar a próxima mensagem
+							}
+							// Espera 50ms e tenta de novo se o outro processo ainda não subiu
+							time.Sleep(50 * time.Millisecond)
+						}
 					}
-					// Espera e tenta de novo se o outro processo ainda não subiu
-					time.Sleep(50 * time.Millisecond)
-				}
-			}(req)
+				}(req.To, ch)
+			}
+			// Coloca a mensagem na fila do destinatário correto
+			ch <- req.Message
 		}
 	}()
 }

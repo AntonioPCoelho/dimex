@@ -134,7 +134,7 @@ func (module *DIMEX_Module) handleUponDeliverReqEntry(msgOutro PP2PLink.PP2PLink
 	euTenhoPrioridade := before(module.id, module.reqTs, idOutro, tsOutro)
 
 	// Injecao de falha -> Para testar as invariantes, remova a exclamação "!" da variável "euTenhoPrioridade" abaixo
-	if module.st == noMX || (module.st == wantMX && euTenhoPrioridade) {
+	if module.st == noMX || (module.st == wantMX && !euTenhoPrioridade) {
 		msg := fmt.Sprintf("respOk|%d", module.id)
 		module.sendToLink(module.addresses[idOutro], msg, " ")
 	} else {
