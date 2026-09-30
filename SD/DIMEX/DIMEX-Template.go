@@ -133,7 +133,6 @@ func (module *DIMEX_Module) handleUponDeliverReqEntry(msgOutro PP2PLink.PP2PLink
 
 	euTenhoPrioridade := before(module.id, module.reqTs, idOutro, tsOutro)
 
-	// ATENÇÃO: Para causar a falha exigida pelo professor na apresentação, comenta a validação !euTenhoPrioridade
 	if module.st == noMX || (module.st == wantMX && !euTenhoPrioridade) {
 		msg := fmt.Sprintf("respOk|%d", module.id)
 		module.sendToLink(module.addresses[idOutro], msg, " ")

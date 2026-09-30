@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println("A iniciar validação dos snapshots...")
+	fmt.Println("Iniciando verificador de snapshots")
 	falhas := 0
 
 	for snId := 1; snId <= 50; snId++ {

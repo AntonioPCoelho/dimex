@@ -37,7 +37,7 @@ func NewPP2PLink(_address string, _dbg bool) *PP2PLink {
 }
 
 func (module *PP2PLink) Start() {
-	// Servidor: Escuta mensagens a chegar
+	// Servidor: Escuta mensagens chegando
 	go func() {
 		ln, err := net.Listen("tcp", module.address)
 		if err != nil {
